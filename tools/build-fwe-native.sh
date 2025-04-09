@@ -73,11 +73,17 @@ PREFIX="/usr/local/`gcc -dumpmachine`"
 export PATH=${PREFIX}/bin:${PATH}
 
 CMAKE_OPTIONS="
-    -DFWE_STATIC_LINK=On
+    -DFWE_STATIC_LINK=Off
     -DFWE_STRIP_SYMBOLS=On
     -DFWE_SECURITY_COMPILE_FLAGS=On
-    -DFWE_TEST_FAKETIME=On
-    -DCMAKE_PREFIX_PATH=${PREFIX}"
+    -DFWE_TEST_FAKETIME=Off
+    -DCMAKE_PREFIX_PATH=${PREFIX}
+    -DBUILD_TESTING=Off
+    -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so
+    -DCURL_LIBRARY=/usr/lib64/libcurl.so
+    -DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so
+    -DSNAPPY_LIBRARY=/usr/lib64/libsnappy.so
+    -Dcrypto_LIBRARY=/usr/lib64/libcrypto.so"
 if ${WITH_GREENGRASSV2_SUPPORT}; then
     CMAKE_OPTIONS="${CMAKE_OPTIONS} -DFWE_FEATURE_GREENGRASSV2=On"
 fi

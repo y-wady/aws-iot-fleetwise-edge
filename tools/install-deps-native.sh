@@ -72,26 +72,17 @@ parse_args() {
 parse_args "$@"
 
 if ${INSTALL_BUILD_TIME_DEPS}; then
-    apt-get update
-    apt-get install -y \
-        build-essential \
-        clang-tidy-12 \
+    dnf update
+    dnf install -y \
         cmake \
         doxygen \
         git \
         graphviz \
-        libsnappy-dev \
-        libssl-dev \
         parallel \
         python3 \
         python3-pip \
         unzip \
-        wget \
-        zlib1g-dev
-    git clone -b ${VERSION_FAKETIME} https://github.com/wolfcw/libfaketime.git
-    cd libfaketime
-    make install -j `nproc`
-    cd ..
+        wget
     update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-12 1000
     python3 -m pip install -r ${SCRIPT_DIR}/requirements-unit-test.txt
 fi
@@ -301,7 +292,7 @@ if ${INSTALL_BUILD_TIME_DEPS} && ( ! ${USE_CACHE} || [ ! -d ${PREFIX} ] ); then
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DBUILD_SHARED_LIBS=${SHARED_LIBS} \
+        -DBUILD_SHARED_LIBS=Off \
         -DCMAKE_POSITION_INDEPENDENT_CODE=On \
         -Dprotobuf_BUILD_TESTS=Off \
         -DCMAKE_INSTALL_PREFIX=${PREFIX} \
@@ -309,37 +300,36 @@ if ${INSTALL_BUILD_TIME_DEPS} && ( ! ${USE_CACHE} || [ ! -d ${PREFIX} ] ); then
     make install -j`nproc`
     cd ../..
 
-    wget -q https://github.com/curl/curl/releases/download/${VERSION_CURL_RELEASE}/curl-${VERSION_CURL}.tar.gz
-    tar -zxf curl-${VERSION_CURL}.tar.gz
-    cd curl-${VERSION_CURL}
-    mkdir build && cd build
-    CURL_OPTIONS="
-        --disable-ldap
-        --enable-ipv6
-        --with-ssl
-        --disable-unix-sockets
-        --disable-rtsp
-        --without-zstd
-        --without-ca-bundle
-        --without-ca-path
-        --with-ca-fallback
-        --without-brotli
-        --prefix=${PREFIX}"
-    if [ "${SHARED_LIBS}" == "OFF" ]; then
-        LDFLAGS="-static" PKG_CONFIG="pkg-config --static" \
-        ../configure \
-            --disable-shared \
-            --enable-static \
-            ${CURL_OPTIONS}
-        make install -j`nproc` V=1 LDFLAGS="-static"
-    else
-        ../configure \
-            --enable-shared \
-            --disable-static \
-            ${CURL_OPTIONS}
-        make install -j`nproc` V=1
-    fi
-    cd ../..
+    # wget -q https://github.com/curl/curl/releases/download/${VERSION_CURL_RELEASE}/curl-${VERSION_CURL}.tar.gz
+    # tar -zxf curl-${VERSION_CURL}.tar.gz
+    # cd curl-${VERSION_CURL}
+    # mkdir build && cd build
+    # CURL_OPTIONS="
+    #     --disable-ldap
+    #     --enable-ipv6
+    #     --with-ssl
+    #     --disable-unix-sockets
+    #     --disable-rtsp
+    #     --without-zstd
+    #     --without-ca-bundle
+    #     --without-ca-path
+    #     --with-ca-fallback
+    #     --prefix=${PREFIX}"
+    # if [ "${SHARED_LIBS}" == "OFF" ]; then
+    #     LDFLAGS="-static" PKG_CONFIG="pkg-config --static" \
+    #     ../configure \
+    #         --disable-shared \
+    #         --enable-static \
+    #         ${CURL_OPTIONS}
+    #     make install -j`nproc` V=1 LDFLAGS="-static"
+    # else
+    #     ../configure \
+    #         --enable-shared \
+    #         --disable-static \
+    #         ${CURL_OPTIONS}
+    #     make install -j`nproc` V=1
+    # fi
+    # cd ../..
 
     # Build AWS IoT Device SDK before AWS SDK because they both include aws-crt-cpp as submodules.
     # And although we make sure both versions match, we want the AWS SDK version to prevail so that

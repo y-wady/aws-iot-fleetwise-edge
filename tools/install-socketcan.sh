@@ -27,8 +27,8 @@ parse_args "$@"
 
 if ! command -v cansend > /dev/null; then
     # Install packages
-    apt-get update
-    apt-get install -y can-utils
+    dnf update
+    dnf install -y can-utils
 fi
 
 # For EC2, the SocketCAN modules vcan and can-gw are included in a separate package:
